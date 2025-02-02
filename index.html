@@ -18,11 +18,16 @@
                 <button id="start" class="btn"><i class="fas fa-play"></i></button>
                 <button id="pause" class="btn" disabled><i class="fas fa-pause"></i></button>
                 <button id="reset" class="btn"><i class="fas fa-redo"></i></button>
+                <button id="mode-toggle" class="btn">Rest Mode</button>
             </div>
             <div class="timer-selection">
                 <button class="timer-btn active" data-time="25">25 min</button>
                 <button class="timer-btn" data-time="15">15 min</button>
                 <button class="timer-btn" data-time="5">5 min</button>
+            </div>
+            <div class="custom-time">
+                <input type="number" id="custom-minutes" min="1" max="180" placeholder="Custom minutes">
+                <button id="set-custom-time" class="timer-btn">Set Custom Time</button>
             </div>
         </div>
     </div>

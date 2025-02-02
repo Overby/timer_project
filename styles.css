@@ -89,4 +89,50 @@ h1 {
 .timer-btn.active {
     background-color: #2ecc71;
     color: white;
+}
+
+.custom-time {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+#custom-minutes {
+    padding: 0.5rem;
+    border: 2px solid #ecf0f1;
+    border-radius: 20px;
+    width: 140px;
+    text-align: center;
+    font-size: 1rem;
+}
+
+#custom-minutes:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+#custom-minutes::-webkit-inner-spin-button,
+#custom-minutes::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#set-custom-time {
+    background-color: #3498db;
+    color: white;
+}
+
+#set-custom-time:hover {
+    background-color: #2980b9;
+}
+
+#mode-toggle {
+    background-color: #e74c3c;
+    border-radius: 20px;
+    padding: 0.8rem 1.2rem;
+    font-size: 0.9rem;
+}
+
+#mode-toggle:hover {
+    background-color: #c0392b;
 } 
