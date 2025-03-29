@@ -13,6 +13,35 @@ const customMinutesInput = document.getElementById('custom-minutes');
 const setCustomTimeButton = document.getElementById('set-custom-time');
 const modeToggleButton = document.getElementById('mode-toggle');
 
+// Add audio configuration
+const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
+alarmSound.volume = 0.7; // Set default volume to 70%
+let alarmInterval = null;
+
+// Function to play alarm sound multiple times
+function playAlarmSound() {
+    alarmSound.play();
+    let playCount = 0;
+    alarmInterval = setInterval(() => {
+        if (playCount < 3) { // Play 4 times total (initial + 3)
+            alarmSound.play();
+            playCount++;
+        } else {
+            clearInterval(alarmInterval);
+        }
+    }, 1000);
+}
+
+// Function to stop alarm sound
+function stopAlarmSound() {
+    if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+    }
+    alarmSound.pause();
+    alarmSound.currentTime = 0;
+}
+
 function updateTitle(minutes, seconds) {
     if (isRunning) {
         document.title = `(${minutes}:${seconds < 10 ? '0' : ''}${seconds}) Pomodoro Timer`;
@@ -47,7 +76,7 @@ function startTimer() {
                 isRunning = false;
                 startButton.disabled = false;
                 pauseButton.disabled = true;
-                new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play();
+                playAlarmSound();
             }
         }, 1000);
     }
@@ -58,12 +87,14 @@ function pauseTimer() {
     isRunning = false;
     startButton.disabled = false;
     pauseButton.disabled = true;
+    stopAlarmSound(); // Stop alarm if it's playing
     document.title = 'Pomodoro Timer'; // Reset title when paused
 }
 
 function resetTimer() {
     clearInterval(timerId);
     isRunning = false;
+    stopAlarmSound(); // Stop alarm if it's playing
     timeLeft = isWorkMode ? 
         parseInt(document.querySelector('.timer-btn.active').dataset.time) * 60 :
         5 * 60; // 5 minutes for rest mode
@@ -83,15 +114,39 @@ function setTimer(minutes) {
 }
 
 function setCustomTimer() {
-    const customMinutes = parseInt(customMinutesInput.value);
-    if (customMinutes && customMinutes > 0 && customMinutes <= 180) {
-        timerButtons.forEach(btn => btn.classList.remove('active'));
+    const inputValue = customMinutesInput.value.trim();
+    let totalSeconds;
+
+    // Check if input contains a colon (MM:SS format)
+    if (inputValue.includes(':')) {
+        const [minutes, seconds] = inputValue.split(':').map(num => parseInt(num));
         
-        setTimer(customMinutes);
+        // Validate minutes and seconds
+        if (isNaN(minutes) || isNaN(seconds) || 
+            minutes < 0 || minutes > 180 || 
+            seconds < 0 || seconds > 59) {
+            alert('Please enter a valid time in MM:SS format (max 180:00)');
+            return;
+        }
         
-        customMinutesInput.value = '';
+        totalSeconds = (minutes * 60) + seconds;
     } else {
-        alert('Please enter a valid time between 1 and 180 minutes');
+        // Handle minutes-only input
+        const minutes = parseInt(inputValue);
+        if (!minutes || minutes <= 0 || minutes > 180) {
+            alert('Please enter a valid time (1-180 minutes or MM:SS format)');
+            return;
+        }
+        totalSeconds = minutes * 60;
+    }
+
+    if (totalSeconds > 0) {
+        timerButtons.forEach(btn => btn.classList.remove('active'));
+        timeLeft = totalSeconds;
+        updateDisplay();
+        startButton.disabled = false;
+        pauseButton.disabled = true;
+        customMinutesInput.value = '';
     }
 }
 
