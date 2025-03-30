@@ -2,6 +2,7 @@ let timeLeft;
 let timerId = null;
 let isRunning = false;
 let isWorkMode = true;
+let currentTask = '';
 let notificationsEnabled = false;
 
 const minutesDisplay = document.getElementById('minutes');
@@ -13,6 +14,12 @@ const timerButtons = document.querySelectorAll('.timer-btn');
 const customMinutesInput = document.getElementById('custom-minutes');
 const setCustomTimeButton = document.getElementById('set-custom-time');
 const modeToggleButton = document.getElementById('mode-toggle');
+const taskModal = document.getElementById('task-modal');
+const taskInput = document.getElementById('task-input');
+const startWithTaskButton = document.getElementById('start-with-task');
+const skipTaskButton = document.getElementById('skip-task');
+const currentTaskDisplay = document.getElementById('current-task');
+const taskTextDisplay = document.getElementById('task-text');
 
 // Add audio configuration
 const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
@@ -85,11 +92,49 @@ function updateDisplay() {
     updateTitle(minutes, seconds);
 }
 
+function showTaskModal() {
+    taskModal.classList.remove('hidden');
+    taskInput.value = '';
+    taskInput.focus();
+}
+
+function hideTaskModal() {
+    taskModal.classList.add('hidden');
+}
+
+function updateTaskDisplay() {
+    if (currentTask && isRunning) {
+        taskTextDisplay.textContent = currentTask;
+        currentTaskDisplay.classList.remove('hidden');
+    } else {
+        currentTaskDisplay.classList.add('hidden');
+    }
+}
+
+function handleTaskSubmit() {
+    currentTask = taskInput.value.trim();
+    hideTaskModal();
+    updateTaskDisplay();
+    startTimer();
+}
+
+function handleTaskSkip() {
+    currentTask = '';
+    hideTaskModal();
+    startTimer();
+}
+
 function startTimer() {
     if (!isRunning) {
+        if (isWorkMode && !currentTask) {
+            showTaskModal();
+            return;
+        }
+        
         isRunning = true;
         startButton.disabled = true;
         pauseButton.disabled = false;
+        updateTaskDisplay();
         
         timerId = setInterval(() => {
             timeLeft--;
@@ -100,6 +145,8 @@ function startTimer() {
                 isRunning = false;
                 startButton.disabled = false;
                 pauseButton.disabled = true;
+                currentTask = '';
+                updateTaskDisplay();
                 playAlarmSound();
                 sendNotification();
             }
@@ -112,21 +159,24 @@ function pauseTimer() {
     isRunning = false;
     startButton.disabled = false;
     pauseButton.disabled = true;
-    stopAlarmSound(); // Stop alarm if it's playing
-    document.title = 'Pomodoro Timer'; // Reset title when paused
+    stopAlarmSound();
+    updateTaskDisplay();
+    document.title = 'Pomodoro Timer';
 }
 
 function resetTimer() {
     clearInterval(timerId);
     isRunning = false;
-    stopAlarmSound(); // Stop alarm if it's playing
+    stopAlarmSound();
+    currentTask = '';
     timeLeft = isWorkMode ? 
         parseInt(document.querySelector('.timer-btn.active').dataset.time) * 60 :
-        5 * 60; // 5 minutes for rest mode
+        5 * 60;
     updateDisplay();
+    updateTaskDisplay();
     startButton.disabled = false;
     pauseButton.disabled = true;
-    document.title = 'Pomodoro Timer'; // Reset title when reset
+    document.title = 'Pomodoro Timer';
 }
 
 function setTimer(minutes) {
@@ -217,6 +267,15 @@ customMinutesInput.addEventListener('keypress', (e) => {
 });
 
 modeToggleButton.addEventListener('click', toggleMode);
+
+startWithTaskButton.addEventListener('click', handleTaskSubmit);
+skipTaskButton.addEventListener('click', handleTaskSkip);
+taskInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleTaskSubmit();
+    }
+});
 
 // Initialize timer
 timeLeft = 25 * 60; // 25 minutes by default

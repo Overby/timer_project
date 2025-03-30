@@ -7,6 +7,7 @@
     --card: #ffffff;
     --text: #1e293b;
     --text-light: #64748b;
+    --modal-overlay: rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -210,4 +211,113 @@ h1 {
 
 #set-custom-time {
     white-space: nowrap;
+}
+
+/* Current Task Display */
+.current-task {
+    background-color: var(--background);
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    margin: 0.5rem 0 1.5rem;
+    font-size: 1rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.current-task i {
+    color: var(--primary);
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--modal-overlay);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.modal-content {
+    background-color: var(--card);
+    padding: 2rem;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+.modal h2 {
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+#task-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: none;
+    margin-bottom: 1.5rem;
+    transition: border-color 0.2s ease;
+}
+
+#task-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.modal-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modal-btn {
+    background-color: var(--primary);
+    color: white;
+}
+
+.modal-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.modal-btn-secondary {
+    background-color: #e2e8f0;
+    color: var(--text);
+}
+
+.modal-btn-secondary:hover {
+    background-color: #cbd5e1;
+}
+
+.hidden {
+    display: none !important;
+    opacity: 0;
 } 

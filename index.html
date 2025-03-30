@@ -13,6 +13,9 @@
 <body>
     <div class="container">
         <h1><span class="tooltip"><i class="fas fa-apple-whole" style="color: #ff6b6b;"></i><span class="tooltip-text">The Pomodoro Technique is a time management method that uses a timer to break work into focused 25-minute intervals, separated by short breaks. This helps improve productivity and maintain mental freshness.</span></span> Pomodoro Timer</h1>
+        <div id="current-task" class="current-task hidden">
+            <i class="fas fa-bullseye"></i> <span id="task-text">No task set</span>
+        </div>
         <div class="timer-container">
             <div class="timer">
                 <span id="minutes">25</span><span class="time-separator">:</span><span id="seconds">00</span>
@@ -31,6 +34,17 @@
             <div class="custom-time">
                 <input type="text" id="custom-minutes" placeholder="Enter time (e.g., 25:30)">
                 <button id="set-custom-time" class="timer-btn">Set Custom Time</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div id="task-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>What will you focus on?</h2>
+            <textarea id="task-input" placeholder="Enter your task for this session..." rows="3"></textarea>
+            <div class="modal-buttons">
+                <button id="start-with-task" class="modal-btn">Start Session</button>
+                <button id="skip-task" class="modal-btn modal-btn-secondary">Skip</button>
             </div>
         </div>
     </div>
