@@ -3,7 +3,7 @@
     --primary-dark: #4f46e5;
     --success: #22c55e;
     --danger: #ef4444;
-    --background: #f8fafc;
+    --background: #fff5eb;
     --card: #ffffff;
     --text: #1e293b;
     --text-light: #64748b;
@@ -41,6 +41,56 @@ h1 {
     font-weight: 700;
 }
 
+/* Tooltip styles */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    width: 300px;
+    background-color: var(--text);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: normal;
+    line-height: 1.4;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 10px;
+    
+    /* Add animation */
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+/* Arrow for tooltip */
+.tooltip .tooltip-text::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent var(--text) transparent;
+}
+
+/* Show the tooltip on hover */
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
 .timer-container {
     display: flex;
     flex-direction: column;
@@ -49,11 +99,25 @@ h1 {
 }
 
 .timer {
-    font-size: 4.5rem;
-    font-weight: 700;
+    font-size: 6rem;
+    font-weight: bold;
     color: var(--text);
     font-family: 'Inter', monospace;
-    letter-spacing: -2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 2rem 0;
+}
+
+#minutes, #seconds {
+    min-width: 2ch;
+    text-align: center;
+}
+
+.time-separator {
+    color: var(--text);
+    font-weight: bold;
 }
 
 .controls {

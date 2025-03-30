@@ -12,10 +12,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Pomodoro Timer</h1>
+        <h1><span class="tooltip"><i class="fas fa-apple-whole" style="color: #ff6b6b;"></i><span class="tooltip-text">The Pomodoro Technique is a time management method that uses a timer to break work into focused 25-minute intervals, separated by short breaks. This helps improve productivity and maintain mental freshness.</span></span> Pomodoro Timer</h1>
         <div class="timer-container">
             <div class="timer">
-                <span id="minutes">25</span>:<span id="seconds">00</span>
+                <span id="minutes">25</span><span class="time-separator">:</span><span id="seconds">00</span>
             </div>
             <div class="controls">
                 <button id="start" class="btn"><i class="fas fa-play"></i></button>
@@ -29,7 +29,7 @@
                 <button class="timer-btn" data-time="5">5 min</button>
             </div>
             <div class="custom-time">
-                <input type="number" id="custom-minutes" min="1" max="180" placeholder="Custom minutes">
+                <input type="text" id="custom-minutes" placeholder="Enter time (e.g., 25:30)">
                 <button id="set-custom-time" class="timer-btn">Set Custom Time</button>
             </div>
         </div>

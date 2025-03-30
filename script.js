@@ -2,6 +2,7 @@ let timeLeft;
 let timerId = null;
 let isRunning = false;
 let isWorkMode = true;
+let notificationsEnabled = false;
 
 const minutesDisplay = document.getElementById('minutes');
 const secondsDisplay = document.getElementById('seconds');
@@ -17,6 +18,25 @@ const modeToggleButton = document.getElementById('mode-toggle');
 const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
 alarmSound.volume = 0.7; // Set default volume to 70%
 let alarmInterval = null;
+
+// Request notification permission when the page loads
+if ('Notification' in window) {
+    Notification.requestPermission().then(function(permission) {
+        notificationsEnabled = permission === 'granted';
+    });
+}
+
+// Function to send notification
+function sendNotification() {
+    if (notificationsEnabled) {
+        const mode = isWorkMode ? 'Work' : 'Rest';
+        const notification = new Notification('Pomodoro Timer', {
+            body: `${mode} session completed! Time for a ${isWorkMode ? 'break' : 'new work session'}!`,
+            icon: 'https://cdn-icons-png.flaticon.com/512/1830/1830839.png', // Tomato icon
+            silent: true // We'll play our own sound
+        });
+    }
+}
 
 // Function to play alarm sound multiple times
 function playAlarmSound() {
@@ -44,9 +64,12 @@ function stopAlarmSound() {
 
 function updateTitle(minutes, seconds) {
     if (isRunning) {
-        document.title = `(${minutes}:${seconds < 10 ? '0' : ''}${seconds}) Pomodoro Timer`;
+        // Format with leading zeros for both minutes and seconds
+        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+        const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+        document.title = `${formattedMinutes}:${formattedSeconds} Pomodoro Timer`;
     } else {
-        document.title = 'Pomodoro Timer'; // Reset title when timer is not running
+        document.title = 'Pomodoro Timer';
     }
 }
 
@@ -54,10 +77,11 @@ function updateDisplay() {
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     
-    minutesDisplay.textContent = minutes;
+    // Format minutes and seconds with leading zeros
+    minutesDisplay.textContent = minutes < 10 ? '0' + minutes : minutes;
     secondsDisplay.textContent = seconds < 10 ? '0' + seconds : seconds;
     
-    // Add title update
+    // Add title update with proper MM:SS format
     updateTitle(minutes, seconds);
 }
 
@@ -77,6 +101,7 @@ function startTimer() {
                 startButton.disabled = false;
                 pauseButton.disabled = true;
                 playAlarmSound();
+                sendNotification();
             }
         }, 1000);
     }
@@ -119,22 +144,29 @@ function setCustomTimer() {
 
     // Check if input contains a colon (MM:SS format)
     if (inputValue.includes(':')) {
-        const [minutes, seconds] = inputValue.split(':').map(num => parseInt(num));
+        const parts = inputValue.split(':');
+        if (parts.length !== 2) {
+            alert('Please use MM:SS format (e.g., "25:30" for 25 minutes and 30 seconds)');
+            return;
+        }
+
+        const minutes = parseInt(parts[0].trim());
+        const seconds = parseInt(parts[1].trim());
         
         // Validate minutes and seconds
         if (isNaN(minutes) || isNaN(seconds) || 
             minutes < 0 || minutes > 180 || 
             seconds < 0 || seconds > 59) {
-            alert('Please enter a valid time in MM:SS format (max 180:00)');
+            alert('Please enter a valid time (minutes: 0-180, seconds: 0-59)');
             return;
         }
         
         totalSeconds = (minutes * 60) + seconds;
     } else {
-        // Handle minutes-only input
+        // Handle minutes-only input for backward compatibility
         const minutes = parseInt(inputValue);
         if (!minutes || minutes <= 0 || minutes > 180) {
-            alert('Please enter a valid time (1-180 minutes or MM:SS format)');
+            alert('Please enter either MM:SS format (e.g., "25:30") or minutes only (1-180)');
             return;
         }
         totalSeconds = minutes * 60;
