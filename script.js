@@ -5,6 +5,7 @@ let isWorkMode = true;
 let currentTask = '';
 let notificationsEnabled = false;
 
+// Get all DOM elements
 const minutesDisplay = document.getElementById('minutes');
 const secondsDisplay = document.getElementById('seconds');
 const startButton = document.getElementById('start');
@@ -17,13 +18,13 @@ const modeToggleButton = document.getElementById('mode-toggle');
 const taskModal = document.getElementById('task-modal');
 const taskInput = document.getElementById('task-input');
 const startWithTaskButton = document.getElementById('start-with-task');
-const skipTaskButton = document.getElementById('skip-task');
 const currentTaskDisplay = document.getElementById('current-task');
 const taskTextDisplay = document.getElementById('task-text');
+const modalCloseButton = document.querySelector('.modal-close');
 
 // Add audio configuration
 const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg');
-alarmSound.volume = 0.7; // Set default volume to 70%
+alarmSound.volume = 0.7;
 let alarmInterval = null;
 
 // Request notification permission when the page loads
@@ -96,6 +97,7 @@ function showTaskModal() {
     taskModal.classList.remove('hidden');
     taskInput.value = '';
     taskInput.focus();
+    startButton.disabled = true;
 }
 
 function hideTaskModal() {
@@ -115,12 +117,6 @@ function handleTaskSubmit() {
     currentTask = taskInput.value.trim();
     hideTaskModal();
     updateTaskDisplay();
-    startTimer();
-}
-
-function handleTaskSkip() {
-    currentTask = '';
-    hideTaskModal();
     startTimer();
 }
 
@@ -269,11 +265,28 @@ customMinutesInput.addEventListener('keypress', (e) => {
 modeToggleButton.addEventListener('click', toggleMode);
 
 startWithTaskButton.addEventListener('click', handleTaskSubmit);
-skipTaskButton.addEventListener('click', handleTaskSkip);
 taskInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handleTaskSubmit();
+    }
+});
+
+// Function to handle modal close
+function handleModalClose(e) {
+    e.preventDefault();
+    hideTaskModal();
+    // If timer hasn't started yet, enable the start button
+    if (!isRunning) {
+        startButton.disabled = false;
+    }
+}
+
+// Add event listeners for modal interactions
+modalCloseButton.addEventListener('click', handleModalClose);
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !taskModal.classList.contains('hidden')) {
+        handleModalClose(e);
     }
 });
 

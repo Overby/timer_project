@@ -8,21 +8,110 @@
     --text: #1e293b;
     --text-light: #64748b;
     --modal-overlay: rgba(0, 0, 0, 0.5);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Prevent text size adjustment on orientation change */
+html {
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--background);
     min-height: 100vh;
+    min-height: -webkit-fill-available;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 1rem) env(safe-area-inset-left);
+}
+
+/* Mobile-specific container adjustments */
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .timer {
+        font-size: 4.5rem; /* Slightly smaller on mobile */
+        margin: 1.5rem 0;
+    }
+
+    .controls {
+        gap: 0.75rem;
+    }
+
+    .btn {
+        padding: 0.875rem 1.125rem;
+    }
+
+    .timer-selection {
+        gap: 0.5rem;
+    }
+
+    .timer-btn {
+        padding: 0.625rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .custom-time {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    #custom-minutes {
+        width: 100%;
+    }
+
+    #set-custom-time {
+        width: 100%;
+    }
+}
+
+/* Modal improvements for mobile */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 1rem;
+        padding: 1.5rem;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #task-input {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 0.875rem;
+    }
+
+    .modal-buttons {
+        padding-bottom: var(--safe-area-inset-bottom);
+    }
+
+    .modal-btn {
+        width: 100%;
+        padding: 1rem;
+    }
+}
+
+/* Add active state styles for touch devices */
+@media (hover: none) {
+    .btn:active, 
+    .timer-btn:active,
+    .modal-btn:active {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
 }
 
 .container {
@@ -256,6 +345,22 @@ h1 {
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     transform: translateY(0);
     transition: transform 0.3s ease;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.75rem !important;
+    font-size: 1rem;
+    background-color: var(--text-light) !important;
+    color: white !important;
+}
+
+.modal-close:hover {
+    background-color: var(--text) !important;
+    transform: translateY(-1px);
 }
 
 .modal h2 {
