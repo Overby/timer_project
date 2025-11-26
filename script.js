@@ -4,6 +4,7 @@ let isRunning = false;
 let isWorkMode = true;
 let currentTask = '';
 let notificationsEnabled = false;
+let customTimeSet = false; // Track if a custom time was set
 
 // Get all DOM elements
 const minutesDisplay = document.getElementById('minutes');
@@ -27,16 +28,31 @@ const alarmSound = new Audio('https://actions.google.com/sounds/v1/alarms/alarm_
 alarmSound.volume = 0.7;
 let alarmInterval = null;
 
-// Request notification permission when the page loads
-if ('Notification' in window) {
-    Notification.requestPermission().then(function(permission) {
-        notificationsEnabled = permission === 'granted';
-    });
+// Request notification permission (only if not already denied)
+if ('Notification' in window && Notification.permission === 'default') {
+    // Don't request immediately - wait for user interaction
+    // We'll request it when timer completes or when user starts timer
+}
+
+// Function to request notification permission if needed
+function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(function(permission) {
+            notificationsEnabled = permission === 'granted';
+        });
+    } else if (Notification.permission === 'granted') {
+        notificationsEnabled = true;
+    }
 }
 
 // Function to send notification
 function sendNotification() {
-    if (notificationsEnabled) {
+    // Request permission if not already granted/denied
+    if ('Notification' in window && Notification.permission === 'default') {
+        requestNotificationPermission();
+    }
+    
+    if (notificationsEnabled || Notification.permission === 'granted') {
         const mode = isWorkMode ? 'Work' : 'Rest';
         const notification = new Notification('Pomodoro Timer', {
             body: `${mode} session completed! Time for a ${isWorkMode ? 'break' : 'new work session'}!`,
@@ -48,11 +64,16 @@ function sendNotification() {
 
 // Function to play alarm sound multiple times
 function playAlarmSound() {
-    alarmSound.play();
+    alarmSound.play().catch(error => {
+        console.log('Audio playback failed:', error);
+        // Audio might be blocked by browser policy, that's okay
+    });
     let playCount = 0;
     alarmInterval = setInterval(() => {
         if (playCount < 3) { // Play 4 times total (initial + 3)
-            alarmSound.play();
+            alarmSound.play().catch(error => {
+                console.log('Audio playback failed:', error);
+            });
             playCount++;
         } else {
             clearInterval(alarmInterval);
@@ -127,6 +148,11 @@ function startTimer() {
             return;
         }
         
+        // Request notification permission on first user interaction
+        if ('Notification' in window && Notification.permission === 'default') {
+            requestNotificationPermission();
+        }
+        
         isRunning = true;
         startButton.disabled = true;
         pauseButton.disabled = false;
@@ -145,6 +171,15 @@ function startTimer() {
                 updateTaskDisplay();
                 playAlarmSound();
                 sendNotification();
+                
+                // Auto-switch mode after timer completes
+                isWorkMode = !isWorkMode;
+                modeToggleButton.textContent = isWorkMode ? 'Rest Mode' : 'Work Mode';
+                
+                // Set default time for new mode (reset custom time flag)
+                customTimeSet = false;
+                timeLeft = isWorkMode ? 25 * 60 : 5 * 60;
+                updateDisplay();
             }
         }, 1000);
     }
@@ -165,9 +200,21 @@ function resetTimer() {
     isRunning = false;
     stopAlarmSound();
     currentTask = '';
-    timeLeft = isWorkMode ? 
-        parseInt(document.querySelector('.timer-btn.active').dataset.time) * 60 :
-        5 * 60;
+    
+    // Reset to appropriate time based on mode and whether custom time was set
+    if (customTimeSet) {
+        // Keep the custom time if one was set
+        // timeLeft remains the same
+    } else {
+        const activeButton = document.querySelector('.timer-btn.active');
+        if (activeButton) {
+            timeLeft = parseInt(activeButton.dataset.time) * 60;
+        } else {
+            // Fallback to default times
+            timeLeft = isWorkMode ? 25 * 60 : 5 * 60;
+        }
+    }
+    
     updateDisplay();
     updateTaskDisplay();
     startButton.disabled = false;
@@ -179,6 +226,7 @@ function setTimer(minutes) {
     clearInterval(timerId);
     isRunning = false;
     timeLeft = minutes * 60;
+    customTimeSet = false; // Reset custom time flag when using preset
     updateDisplay();
     startButton.disabled = false;
     pauseButton.disabled = true;
@@ -221,6 +269,7 @@ function setCustomTimer() {
     if (totalSeconds > 0) {
         timerButtons.forEach(btn => btn.classList.remove('active'));
         timeLeft = totalSeconds;
+        customTimeSet = true; // Mark that custom time is set
         updateDisplay();
         startButton.disabled = false;
         pauseButton.disabled = true;
@@ -232,7 +281,14 @@ function toggleMode() {
     isWorkMode = !isWorkMode;
     modeToggleButton.textContent = isWorkMode ? 'Rest Mode' : 'Work Mode';
     
-    timeLeft = isWorkMode ? 25 * 60 : 5 * 60;
+    // Only reset time if custom time wasn't set
+    if (!customTimeSet) {
+        timeLeft = isWorkMode ? 25 * 60 : 5 * 60;
+    }
+    
+    // Clear task when switching modes
+    currentTask = '';
+    updateTaskDisplay();
     
     clearInterval(timerId);
     isRunning = false;
@@ -284,6 +340,14 @@ function handleModalClose(e) {
 
 // Add event listeners for modal interactions
 modalCloseButton.addEventListener('click', handleModalClose);
+
+// Close modal when clicking backdrop
+taskModal.addEventListener('click', (e) => {
+    if (e.target === taskModal) {
+        handleModalClose(e);
+    }
+});
+
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !taskModal.classList.contains('hidden')) {
         handleModalClose(e);
